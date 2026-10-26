@@ -1,0 +1,245 @@
+
+<section class="details-page">
+  <a class="back-link" routerLink="/admin/kyc">
+    ← Back to KYC Applications
+  </a>
+
+  @if (isLoading()) {
+    <div class="info-card loading-state">
+      Loading KYC details...
+    </div>
+  } @else {
+    @if (errorMessage()) {
+      <div class="info-card error-message" role="alert">
+        {{ errorMessage() }}
+        <button
+          type="button"
+          class="button button-primary"
+          (click)="loadDetails()"
+        >
+          Retry
+        </button>
+      </div>
+    }
+
+    @if (successMessage()) {
+      <div class="info-card success-message" role="status">
+        {{ successMessage() }}
+      </div>
+    }
+
+    <header class="page-header">
+      <div>
+        <h1>KYC Details</h1>
+        <p>Review customer information, documents and verification history.</p>
+      </div>
+
+      <span
+        class="status-badge"
+        [class.pending]="status() === 'Pending'"
+        [class.verified]="status() === 'Verified'"
+        [class.rejected]="status() === 'Rejected'"
+        [class.resubmitted]="status() === 'Re_Submitted'"
+      >
+        {{ status() }}
+      </span>
+    </header>
+
+    <section class="info-card">
+      <div class="section-heading">
+        <div>
+          <h2>Application Information</h2>
+          <p>Basic KYC application details</p>
+        </div>
+        <span class="application-number">{{ kycNumber() || '—' }}</span>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span>KYC ID</span>
+          <strong>{{ kycId }}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Customer ID</span>
+          <strong>{{ customerId() ?? '—' }}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>KYC Number</span>
+          <strong>{{ kycNumber() || '—' }}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Application Date</span>
+          <strong>{{ kycDate() || '—' }}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Verified By (ID)</span>
+          <strong>{{ verifiedBy() ?? '—' }}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Verified Date</span>
+          <strong>{{ verifiedDate() || '—' }}</strong>
+        </div>
+
+        <div class="info-item full-width">
+          <span>Current Remarks</span>
+          <strong>{{ remarks() || 'No remarks available' }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="section-heading">
+        <div>
+          <h2>Document Verification</h2>
+          <p>Review uploaded identity documents</p>
+        </div>
+        <span class="document-count">
+          {{ verifiedDocuments() }} / {{ documents().length }} verified
+        </span>
+      </div>
+
+      <div class="document-list">
+        @for (doc of documents(); track doc.documentId) {
+          <article class="document-card">
+            <div class="document-icon">FILE</div>
+
+            <div class="document-info">
+              <h3>{{ doc.documentType }}</h3>
+              <p>Document ID: {{ doc.documentId }}</p>
+              <span>
+                Document number: {{ doc.documentNumber || 'Not provided' }}
+              </span>
+              <span>Uploaded: {{ doc.uploadDate }}</span>
+              <span class="file-path">
+                Stored file: {{ doc.filePath || 'Path unavailable' }}
+              </span>
+            </div>
+
+           <div class="document-actions">
+  <span
+    class="status-badge"
+    [class.pending]="doc.verificationStatus === 'Pending'"
+    [class.verified]="doc.verificationStatus === 'Verified'"
+    [class.rejected]="doc.verificationStatus === 'Rejected'"
+  >
+    {{ doc.verificationStatus }}
+  </span>
+
+  @if (canReview()) {
+    <div class="action-buttons">
+      <button
+        type="button"
+        class="button button-success"
+        [disabled]="doc.verificationStatus === 'Verified' || isSaving()"
+        (click)="verifyDocument(doc.documentId)"
+      >
+        Verify
+      </button>
+
+      <button
+        type="button"
+        class="button button-danger"
+        [disabled]="doc.verificationStatus === 'Rejected' || isSaving()"
+        (click)="rejectDocument(doc.documentId)"
+      >
+        Reject
+      </button>
+    </div>
+  }
+
+  <button
+    type="button"
+    class="button button-secondary"
+    (click)="previewDocument(doc.documentId)"
+  >
+    Preview Document
+  </button>
+</div>
+          </article>
+        } @empty {
+          <div class="empty-state">No documents available for this application.</div>
+        }
+      </div>
+
+      <p class="demo-note">
+        Document metadata is loaded from the backend. Actual file preview or
+        download requires a backend file-access endpoint.
+      </p>
+    </section>
+
+    <section class="info-card decision-card">
+      <div>
+        <h2>KYC Decision</h2>
+        <p>Verify all documents before approving the application.</p>
+      </div>
+
+      @if (canReview()) {
+        <div class="decision-actions">
+          <button
+            type="button"
+            class="button button-success"
+            [disabled]="!allDocumentsVerified() || isSaving()"
+            (click)="approveKyc()"
+          >
+            {{ isSaving() ? 'Processing...' : 'Approve KYC' }}
+          </button>
+
+          <button
+            type="button"
+            class="button button-danger"
+            [disabled]="isSaving()"
+            (click)="rejectKyc()"
+          >
+            Reject KYC
+          </button>
+        </div>
+      } @else if (status() === 'Rejected') {
+        <button
+          type="button"
+          class="button button-primary"
+          [disabled]="isSaving()"
+          (click)="resubmitKyc()"
+        >
+          Move to Resubmitted
+        </button>
+      } @else {
+        <span class="completed-message">
+          This KYC is already verified.
+        </span>
+      }
+    </section>
+
+    <section class="info-card">
+      <div class="section-heading">
+        <div>
+          <h2>Verification History</h2>
+          <p>Recorded actions for this application</p>
+        </div>
+      </div>
+
+      <div class="history-list">
+        @for (item of history(); track item.logId) {
+          <article class="history-item">
+            <div class="history-dot"></div>
+
+            <div class="history-content">
+              <strong>{{ item.action }}</strong>
+              <p>{{ item.remarks || 'No remarks' }}</p>
+              <span>
+                User ID: {{ item.performedBy ?? '—' }}
+                · {{ item.actionDate }}
+              </span>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state">No verification history available.</div>
+        }
+      </div>
+    </section>
+  }
+</section>

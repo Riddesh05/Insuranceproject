@@ -1,0 +1,45 @@
+
+<div class="customer-shell">
+  <app-customer-sidebar />
+
+  <main class="customer-main">
+    <header class="topbar">
+      <div>
+        <h1>Insurance Management</h1>
+        <p>Manage your insurance services and KYC</p>
+      </div>
+
+      <div class="portal-switcher">
+        <button
+          type="button"
+          class="portal-badge"
+          (click)="togglePortalMenu()"
+          [attr.aria-expanded]="portalMenuOpen">
+          {{ currentPortal }}
+          <span>▾</span>
+        </button>
+
+        @if (portalMenuOpen) {
+          <div class="portal-dropdown">
+            <button type="button" class="portal-option"
+              (click)="switchPortal('admin')">
+              🛡️ Admin
+            </button>
+            <button type="button" class="portal-option"
+              (click)="switchPortal('agent')">
+              👤 Agent
+            </button>
+            <button type="button" class="portal-option active"
+              (click)="switchPortal('customer')">
+              👥 Customer
+            </button>
+          </div>
+        }
+      </div>
+    </header>
+
+    <div class="page-content">
+      <router-outlet />
+    </div>
+  </main>
+</div>

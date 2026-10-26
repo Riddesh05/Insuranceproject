@@ -1,0 +1,56 @@
+
+<div class="agent-shell">
+  <app-agent-sidebar />
+
+  <main class="agent-main">
+    <header class="topbar">
+      <div class="topbar-heading">
+        <h1>Insurance Management</h1>
+        <p>Manage your assigned customers and KYC activities</p>
+      </div>
+
+      <div class="portal-switcher">
+        <button
+          type="button"
+          class="portal-badge"
+          (click)="togglePortalMenu()"
+          [attr.aria-expanded]="portalMenuOpen"
+          aria-label="Switch portal">
+          <span>{{ currentPortal }}</span>
+          <span class="dropdown-arrow">▾</span>
+        </button>
+
+        @if (portalMenuOpen) {
+          <div class="portal-dropdown">
+            <button
+              type="button"
+              class="portal-option"
+              (click)="switchPortal('admin')">
+              <span>🛡️</span>
+              <span>Admin</span>
+              @if (currentPortal === 'Admin') {
+                <span class="selected-mark">✓</span>
+              }
+            </button>
+
+            <button
+              type="button"
+              class="portal-option"
+              [class.active]="currentPortal === 'Agent'"
+              (click)="switchPortal('agent')">
+              <span>👤</span>
+              <span>Agent</span>
+              @if (currentPortal === 'Agent') {
+                <span class="selected-mark">✓</span>
+              }
+            </button>
+          </div>
+        }
+      </div>
+    </header>
+
+    <div class="page-content">
+      <router-outlet />
+    </div>
+  </main>
+</div>

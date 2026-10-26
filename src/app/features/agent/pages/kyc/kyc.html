@@ -1,0 +1,334 @@
+
+<div class="kyc-page">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">AGENT PORTAL</p>
+      <h1>KYC Management</h1>
+      <p class="subtitle">
+        Select a customer to create a KYC request or find an existing one.
+      </p>
+    </div>
+    <span class="role-badge">Agent</span>
+  </div>
+
+  <!-- Alerts -->
+  <div *ngIf="errorMessage" class="alert error-alert" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert success-alert" role="status">
+    {{ successMessage }}
+  </div>
+
+  <!-- Customer Selection -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Customer KYC</h2>
+        <p>Search and select a customer from the Customer service.</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="customerSearch">Search Customer</label>
+        <input
+          id="customerSearch"
+          name="customerSearch"
+          type="text"
+          [(ngModel)]="customerSearch"
+          placeholder="Search by name, email, mobile or ID"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="selectedCustomerId">Select Customer</label>
+        <select
+          id="selectedCustomerId"
+          name="selectedCustomerId"
+          [(ngModel)]="selectedCustomerId"
+          (ngModelChange)="onCustomerSelected()"
+        >
+          <option [ngValue]="null">Select a customer</option>
+
+          <option
+            *ngFor="let customer of filteredCustomers"
+            [ngValue]="customer.customerId"
+          >
+            {{ customer.firstName }} {{ customer.lastName }}
+            — ID: {{ customer.customerId }}
+          </option>
+        </select>
+
+        <small *ngIf="customerLoading">
+          Loading customers...
+        </small>
+
+        <small
+          *ngIf="!customerLoading && customers.length === 0"
+        >
+          No customers available.
+        </small>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="createKyc()"
+        [disabled]="loading || customerLoading || !selectedCustomerId"
+      >
+        {{ loading ? 'Processing...' : 'Create KYC' }}
+      </button>
+    </div>
+
+    <!-- Selected customer information -->
+    <div
+      class="details-grid"
+      *ngIf="selectedCustomerId as selectedId"
+    >
+      <ng-container *ngFor="let customer of customers">
+        <ng-container *ngIf="customer.customerId === selectedId">
+          <div class="detail-item">
+            <span>Customer Name</span>
+            <strong>
+              {{ customer.firstName }} {{ customer.lastName }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Email</span>
+            <strong>{{ customer.email }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Mobile Number</span>
+            <strong>{{ customer.mobileNumber }}</strong>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Find existing KYC -->
+    <div class="form-row">
+      <div class="form-field">
+        <label for="kycId">Existing KYC ID</label>
+        <input
+          id="kycId"
+          name="kycId"
+          type="number"
+          min="1"
+          [(ngModel)]="kycId"
+          placeholder="Enter KYC ID"
+        />
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="findKyc()"
+        [disabled]="loading"
+      >
+        Find KYC
+      </button>
+    </div>
+
+    <p *ngIf="loading" class="loading-text">
+      Loading, please wait...
+    </p>
+  </section>
+
+  <!-- KYC Details -->
+  <section class="panel" *ngIf="kyc">
+    <div class="panel-heading">
+      <div>
+        <h2>KYC Details</h2>
+        <p>Request information from the KYC service.</p>
+      </div>
+
+      <span
+        class="status-badge"
+        [ngClass]="'status-' + kyc.verificationStatus.toLowerCase()"
+      >
+        {{ kyc.verificationStatus }}
+      </span>
+    </div>
+
+    <div class="details-grid">
+      <div class="detail-item">
+        <span>KYC ID</span>
+        <strong>{{ kyc.kycId }}</strong>
+      </div>
+
+      <div class="detail-item">
+        <span>Customer ID</span>
+        <strong>{{ kyc.customerId }}</strong>
+      </div>
+
+      <div class="detail-item">
+        <span>KYC Number</span>
+        <strong>{{ kyc.kycNumber }}</strong>
+      </div>
+
+      <div class="detail-item">
+        <span>KYC Date</span>
+        <strong>{{ kyc.kycDate | date:'mediumDate' }}</strong>
+      </div>
+
+      <div class="detail-item full-width" *ngIf="kyc.remarks">
+        <span>Remarks</span>
+        <strong>{{ kyc.remarks }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rejected KYC Resubmission -->
+  <div
+    class="resubmit-section"
+    *ngIf="kyc?.verificationStatus === 'Rejected'"
+  >
+    <p>
+      This KYC was rejected. Upload the required document before resubmitting.
+    </p>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="resubmitKyc()"
+      [disabled]="loading || uploading || !hasUploadedDocument"
+    >
+      {{ loading ? 'Resubmitting...' : 'Resubmit KYC' }}
+    </button>
+  </div>
+
+  <!-- Upload KYC Document -->
+  <section class="panel" *ngIf="kyc">
+    <div class="panel-heading">
+      <div>
+        <h2>Upload KYC Document</h2>
+        <p>
+          Accepted formats: PDF, JPG, JPEG and PNG.
+          Maximum size: 5 MB.
+        </p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="uploadDocument()">
+      <div class="upload-grid">
+        <div class="form-field">
+          <label for="documentType">Document Type</label>
+          <select
+            id="documentType"
+            name="documentType"
+            [(ngModel)]="documentType"
+            required
+          >
+            <option *ngFor="let type of documentTypes" [value]="type">
+              {{ type.replace('_', ' ') }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="documentNumber">Document Number</label>
+          <input
+            id="documentNumber"
+            name="documentNumber"
+            type="text"
+            [(ngModel)]="documentNumber"
+            maxlength="100"
+            placeholder="Enter document number"
+            required
+          />
+        </div>
+
+        <div class="form-field file-field">
+          <label for="documentFile">Choose File</label>
+          <input
+            id="documentFile"
+            name="documentFile"
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            (change)="onFileSelected($event)"
+            required
+          />
+
+          <small *ngIf="selectedFile">
+            Selected: {{ selectedFile.name }}
+          </small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="uploading || loading"
+        >
+          {{ uploading ? 'Uploading...' : 'Upload Document' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Submitted Documents -->
+  <section class="panel" *ngIf="kyc">
+    <div class="panel-heading">
+      <div>
+        <h2>Submitted Documents</h2>
+        <p>Documents associated with KYC #{{ kyc.kycId }}.</p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="loadDocuments(kyc.kycId)"
+        [disabled]="loading"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <div
+      class="table-wrapper"
+      *ngIf="documents.length > 0; else noDocuments"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Document ID</th>
+            <th>Type</th>
+            <th>Document Number</th>
+            <th>Uploaded On</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let document of documents">
+            <td>#{{ document.documentId }}</td>
+            <td>{{ document.documentType }}</td>
+            <td>{{ document.documentNumber || '—' }}</td>
+            <td>{{ document.uploadDate | date:'medium' }}</td>
+            <td>
+              <span
+                class="status-badge"
+                [ngClass]="'status-' + document.verificationStatus.toLowerCase()"
+              >
+                {{ document.verificationStatus }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noDocuments>
+      <div class="empty-state">
+        <h3>No documents found</h3>
+        <p>Uploaded documents will appear here.</p>
+      </div>
+    </ng-template>
+  </section>
+</div>

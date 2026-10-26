@@ -1,0 +1,152 @@
+
+<div class="kyc-dashboard">
+
+  <!-- Welcome Banner -->
+  <section class="welcome-card">
+    <div class="welcome-content">
+      <span class="eyebrow">AGENT PORTAL · KYC MANAGEMENT</span>
+
+      <h1>Welcome to KYC Dashboard 👋</h1>
+
+      <p>
+        Manage customer KYC submissions, track verification status
+        and resubmit rejected applications.
+      </p>
+
+      <a routerLink="/agent/kyc" class="primary-button">
+        <span>＋</span>
+        Manage Customer KYC
+      </a>
+    </div>
+
+    <div class="welcome-icon">
+      <div class="shield-circle">✓</div>
+      <span class="floating-dot dot-one"></span>
+      <span class="floating-dot dot-two"></span>
+    </div>
+  </section>
+
+  <!-- Main Dashboard Content -->
+  <section class="content-grid">
+
+    <!-- KYC Workflow -->
+    <article class="dashboard-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>KYC Workflow</h2>
+          <p>Follow the steps to process customer KYC</p>
+        </div>
+
+        <span class="workflow-icon">↗</span>
+      </div>
+
+      <div class="workflow-list">
+
+        <div class="workflow-item">
+          <div class="workflow-number number-purple">01</div>
+
+          <div class="workflow-content">
+            <h3>Select Customer</h3>
+            <p>
+              Find a customer using the Customer service search.
+            </p>
+          </div>
+
+          <span class="workflow-check">✓</span>
+        </div>
+
+        <div class="workflow-item">
+          <div class="workflow-number number-blue">02</div>
+
+          <div class="workflow-content">
+            <h3>Create or Find KYC</h3>
+            <p>
+              Create a new request or open an existing KYC application.
+            </p>
+          </div>
+
+          <span class="workflow-check">✓</span>
+        </div>
+
+        <div class="workflow-item">
+          <div class="workflow-number number-teal">03</div>
+
+          <div class="workflow-content">
+            <h3>Upload Documents</h3>
+            <p>
+              Upload the customer's required identity documents.
+            </p>
+          </div>
+
+          <span class="workflow-check">✓</span>
+        </div>
+
+        <div class="workflow-item">
+          <div class="workflow-number number-orange">04</div>
+
+          <div class="workflow-content">
+            <h3>Track Verification</h3>
+            <p>
+              Check the status and resubmit rejected KYC after correction.
+            </p>
+          </div>
+
+          <span class="workflow-check">✓</span>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- Right Column -->
+    <div class="right-column">
+
+      <!-- Customer KYC Action -->
+      <article class="dashboard-panel action-panel">
+        <div class="action-icon-large">✓</div>
+
+        <h2>Customer KYC</h2>
+
+        <p>
+          Create KYC requests, upload identity documents and manage
+          resubmissions from one place.
+        </p>
+
+        <a routerLink="/agent/kyc" class="action-button">
+          Open KYC Management
+          <span>→</span>
+        </a>
+      </article>
+
+      <!-- Agent Responsibilities -->
+      <article class="dashboard-panel info-panel">
+        <div class="info-heading">
+          <span class="info-symbol">i</span>
+          <h3>Agent Responsibilities</h3>
+        </div>
+
+        <ul>
+          <li>Select the correct customer.</li>
+          <li>Submit KYC and upload documents.</li>
+          <li>Track verification status.</li>
+          <li>Correct and resubmit rejected KYC.</li>
+        </ul>
+
+        <p class="info-note">
+          Document verification and final approval remain with
+          authorized verification roles.
+        </p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+    <span>InsurePro · Agent KYC Workspace</span>
+
+    <a routerLink="/agent/kyc">
+      Go to KYC Management →
+    </a>
+  </footer>
+
+</div>

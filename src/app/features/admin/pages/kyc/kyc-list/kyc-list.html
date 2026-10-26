@@ -1,0 +1,114 @@
+
+<section class="kyc-page">
+  <div class="page-header">
+    <div>
+      <h1>KYC Verification</h1>
+      <p>Review and manage customer KYC applications.</p>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span>Total KYC</span>
+      <h2>{{ totalCount() }}</h2>
+    </article>
+
+    <article class="summary-card">
+      <span>Pending</span>
+      <h2>{{ pendingCount() }}</h2>
+    </article>
+
+    <article class="summary-card">
+      <span>Verified</span>
+      <h2>{{ verifiedCount() }}</h2>
+    </article>
+
+    <article class="summary-card">
+      <span>Rejected</span>
+      <h2>{{ rejectedCount() }}</h2>
+    </article>
+  </div>
+
+  <div class="table-card">
+    <div class="table-heading">
+      <div>
+        <h2>KYC Applications</h2>
+        <p>Review customer verification requests.</p>
+      </div>
+      <span class="record-count">
+        {{ filteredRecords().length }} records
+      </span>
+    </div>
+
+    <div class="filters">
+      <input
+        type="search"
+        placeholder="Search customer ID or KYC number..."
+        [value]="searchText()"
+        (input)="searchText.set($any($event.target).value)"
+      />
+
+      <select
+        [value]="selectedStatus()"
+        (change)="selectedStatus.set($any($event.target).value)"
+      >
+        <option value="All">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Verified">Verified</option>
+        <option value="Rejected">Rejected</option>
+        <option value="Re_Submitted">Resubmitted</option>
+      </select>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>KYC Number</th>
+            <th>Customer ID</th>
+            <th>Submitted Date</th>
+            <th>Status</th>
+            <th>Remarks</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (record of filteredRecords(); track record.kycId) {
+            <tr>
+              <td class="kyc-number">{{ record.kycNumber }}</td>
+              <td>{{ record.customerId }}</td>
+              <td>{{ record.kycDate }}</td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.pending]="record.verificationStatus === 'Pending'"
+                  [class.verified]="record.verificationStatus === 'Verified'"
+                  [class.rejected]="record.verificationStatus === 'Rejected'"
+                  [class.resubmitted]="record.verificationStatus === 'Re_Submitted'"
+                >
+                  {{ record.verificationStatus }}
+                </span>
+              </td>
+              <td class="remarks">{{ record.remarks }}</td>
+              <td>
+                <a
+                  class="view-button"
+                  [routerLink]="['/admin/kyc', record.kycId]"
+                >
+                  View Details
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">
+                No KYC records match your search.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

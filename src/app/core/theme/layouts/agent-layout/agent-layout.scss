@@ -1,0 +1,154 @@
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.agent-shell {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-height: 100vh;
+}
+
+app-agent-sidebar {
+  display: block;
+  flex: 0 0 280px;
+  width: 280px;
+  min-width: 280px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+
+.agent-main {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 32px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.topbar-heading {
+  min-width: 0;
+}
+
+.topbar h1 {
+  margin: 0;
+  color: #172033;
+  font-size: 24px;
+}
+
+.topbar p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.portal-switcher {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.portal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 24px;
+  background: #eef2ff;
+  color: #4338ca;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.portal-badge:hover {
+  background: #e0e7ff;
+}
+
+.dropdown-arrow {
+  font-size: 12px;
+}
+
+.portal-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1000;
+  min-width: 175px;
+  padding: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+}
+
+.portal-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #1e293b;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.portal-option:hover,
+.portal-option.active {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.selected-mark {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.page-content {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 28px 32px;
+}
+
+@media (max-width: 768px) {
+  .agent-shell {
+    flex-direction: column;
+  }
+
+  app-agent-sidebar {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+  }
+
+  .topbar {
+    padding: 20px;
+  }
+
+  .page-content {
+    padding: 20px;
+  }
+}

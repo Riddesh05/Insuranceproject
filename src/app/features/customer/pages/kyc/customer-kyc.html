@@ -1,0 +1,459 @@
+
+<div class="kyc-page">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">CUSTOMER PORTAL</span>
+      <h1>My KYC</h1>
+      <p>Submit your identity documents and track your verification status.</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline"
+      (click)="loadKyc()"
+      [disabled]="loading || !kycId">
+      Refresh Status
+    </button>
+  </header>
+
+  <!-- Error Message -->
+  @if (errorMessage) {
+    <div class="alert alert-error" role="alert">
+      <div>
+        <strong>Something went wrong</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+      <button type="button" class="alert-close" (click)="clearMessages()">
+        ×
+      </button>
+    </div>
+  }
+
+  <!-- Success Message -->
+  @if (successMessage) {
+    <div class="alert alert-success" role="status">
+      <p>{{ successMessage }}</p>
+      <button type="button" class="alert-close" (click)="clearMessages()">
+        ×
+      </button>
+    </div>
+  }
+
+  <!-- Intro -->
+  <section class="intro-card">
+    <div class="intro-icon">✓</div>
+    <div>
+      <h2>Identity Verification</h2>
+      <p>
+        Complete your KYC by submitting the required identity documents.
+        You can track the verification progress here.
+      </p>
+    </div>
+  </section>
+
+  <!-- STEP 1: Create or Find KYC -->
+  @if (!kyc) {
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">STEP 1</span>
+          <h2>Start your KYC</h2>
+          <p>Create a request to begin document verification.</p>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="customerId">Customer ID</label>
+        <input
+          id="customerId"
+          type="number"
+          min="1"
+          [(ngModel)]="customerId"
+          placeholder="Enter your Customer ID" />
+
+        <p class="field-hint">
+          Temporary testing field. In the final customer portal, this ID
+          should come from the authenticated customer's profile.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="createKyc()"
+        [disabled]="loading">
+        {{ loading ? 'Please wait...' : 'Create KYC Request' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="findKycByCustomerId()"
+        [disabled]="loading">
+        {{ loading ? 'Please wait...' : 'Find Existing KYC' }}
+      </button>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <h2>Already have a KYC request?</h2>
+          <p>Enter your existing KYC ID to view its status.</p>
+        </div>
+      </div>
+
+      <div class="lookup-controls">
+        <input
+          #lookupId
+          type="number"
+          min="1"
+          placeholder="Enter KYC ID" />
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          [disabled]="loading || !lookupId.value"
+          (click)="kycId = +lookupId.value; loadKyc()">
+          Find KYC
+        </button>
+      </div>
+    </section>
+  } @else {
+    <!-- KYC Status -->
+    <section class="status-card">
+      <div class="status-top">
+        <div>
+          <span class="eyebrow">YOUR REQUEST</span>
+          <h2>{{ kyc.kycNumber || 'KYC-' + kyc.kycId }}</h2>
+          <p>Customer ID: {{ kyc.customerId }}</p>
+        </div>
+
+        <span
+          class="status-badge"
+          [ngClass]="status.toLowerCase().replaceAll(' ', '-')">
+          {{ status }}
+        </span>
+      </div>
+
+      <div class="request-details">
+        <div>
+          <span>KYC ID</span>
+          <strong>{{ kyc.kycId }}</strong>
+        </div>
+
+        <div>
+          <span>Request Date</span>
+          <strong>
+            {{ kyc.kycDate ? (kyc.kycDate | date:'mediumDate') : '—' }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Verified Date</span>
+          <strong>
+            {{ kyc.verifiedDate ? (kyc.verifiedDate | date:'mediumDate') : 'Not available' }}
+          </strong>
+        </div>
+      </div>
+
+      @if (kyc.remarks) {
+        <div class="remarks">
+          <strong>Verification Remarks</strong>
+          <p>{{ kyc.remarks }}</p>
+        </div>
+      }
+    </section>
+
+    <!-- STEP 2: Document Upload and Rejection -->
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">STEP 2</span>
+          <h2>Upload Identity Documents</h2>
+          <p>Select the document type and upload a clear copy.</p>
+        </div>
+      </div>
+
+      <!-- Individual document rejection and admin remarks -->
+      @for (doc of documents; track doc.documentId) {
+        @if ((doc.verificationStatus || '').toUpperCase() === 'REJECTED') {
+          <div class="document-rejection-alert" role="alert">
+            <strong>
+              Document Rejected — Please re-submit your document.
+            </strong>
+
+            <div class="rejection-detail">
+              <p>
+                <strong>Document:</strong>
+                {{ doc.documentType.replaceAll('_', ' ') }}
+              </p>
+
+              <p>
+                <strong>Admin Remarks:</strong>
+                {{ doc.rejectionRemarks || 'Please upload a corrected document.' }}
+              </p>
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="documentType = doc.documentType; documentNumber = doc.documentNumber || ''; selectedFile = null">
+                Re-upload this document
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Upload form -->
+      @if (canUpload) {
+        <div class="upload-grid">
+          <div class="form-field">
+            <label for="documentType">Document Type</label>
+
+            <select
+              id="documentType"
+              [(ngModel)]="documentType">
+              @for (type of documentTypes; track type) {
+                <option [value]="type">
+                  {{ type.replaceAll('_', ' ') }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="documentNumber">Document Number</label>
+            <input
+              id="documentNumber"
+              type="text"
+              [(ngModel)]="documentNumber"
+              placeholder="Enter document number" />
+          </div>
+
+          <div class="form-field file-field">
+            <label for="documentFile">Choose Document</label>
+            <input
+              id="documentFile"
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event)" />
+
+            @if (selectedFile) {
+              <span class="file-name">
+                Selected: {{ selectedFile.name }}
+              </span>
+            }
+
+            <p class="field-hint">
+              Supported formats: PDF, JPG and PNG.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="uploadDocument()"
+          [disabled]="uploading">
+          {{ uploading ? 'Uploading...' : 'Upload Document' }}
+        </button>
+      } @else {
+        @if (documents.length === 0) {
+          <div class="info-message">
+            Document upload is not available for the current KYC status.
+            Check your verification remarks for further instructions.
+          </div>
+        } @else {
+          <div class="info-message">
+            Your uploaded documents are listed below. New uploads are not
+            available for the current KYC status.
+          </div>
+        }
+      }
+    </section>
+
+    <!-- STEP 3: Submitted Documents -->
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">STEP 3</span>
+          <h2>Submitted Documents</h2>
+          <p>Review the documents submitted with this request.</p>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="loadDocuments()">
+          Refresh
+        </button>
+      </div>
+
+      @if (documents.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">▤</div>
+          <h3>No documents uploaded yet</h3>
+          <p>Your uploaded documents will appear here.</p>
+        </div>
+      } @else {
+        <div class="document-list">
+          @for (doc of documents; track doc.documentId) {
+            <article class="document-row">
+              <div class="document-icon">DOC</div>
+
+              <div class="document-info">
+                <strong>
+                  {{ doc.documentType.replaceAll('_', ' ') }}
+                </strong>
+
+                <span>Document ID: {{ doc.documentId }}</span>
+
+                <span>
+                  Uploaded:
+                  {{ doc.uploadDate ? (doc.uploadDate | date:'mediumDate') : '—' }}
+                </span>
+
+                @if ((doc.verificationStatus || '').toUpperCase() === 'REJECTED') {
+                  <span class="document-rejection-text">
+                    Rejection reason:
+                    {{ doc.rejectionRemarks || 'Please contact the verification team for details.' }}
+                  </span>
+                }
+              </div>
+
+              <span
+                class="status-badge"
+                [ngClass]="(doc.verificationStatus || 'Pending').toLowerCase().replaceAll('_', '-')">
+                {{ doc.verificationStatus || 'Pending' }}
+              </span>
+            </article>
+          }
+        </div>
+      }
+
+      <!-- Resubmit KYC only when overall KYC is rejected -->
+      @if (isRejected) {
+        <div class="resubmit-box">
+          <div>
+            <h3>Correct and Resubmit</h3>
+            <p>
+              Check the verification remarks, upload corrected documents,
+              and resubmit your KYC request.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="resubmitKyc()"
+            [disabled]="loading || documents.length === 0">
+            {{ loading ? 'Submitting...' : 'Resubmit KYC' }}
+          </button>
+        </div>
+      }
+    </section>
+
+    <!-- STEP 4: Verification History -->
+    <section class="panel history-panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">STEP 4</span>
+          <h2>Verification History</h2>
+          <p>Track the activity recorded for your KYC request.</p>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="loadHistory()"
+          [disabled]="historyLoading || !kycId">
+          {{ historyLoading ? 'Loading...' : 'View History' }}
+        </button>
+      </div>
+
+      @if (historyLoading) {
+        <div class="history-message">
+          <span class="history-spinner"></span>
+          <p>Loading verification history...</p>
+        </div>
+      } @else if (historyError) {
+        <div class="history-error">
+          <strong>Unable to load history</strong>
+          <p>{{ historyError }}</p>
+
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="loadHistory()">
+            Try Again
+          </button>
+        </div>
+      } @else if (historyLoaded && history.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">◷</div>
+          <h3>No history records found</h3>
+          <p>
+            No verification activity is currently available for this KYC request.
+          </p>
+        </div>
+      } @else if (historyLoaded && history.length > 0) {
+        <div class="history-timeline">
+          @for (item of history; track item['logId'] ?? $index) {
+            <article class="history-entry">
+              <div class="timeline-marker">
+                <span></span>
+              </div>
+
+              <div class="history-entry-content">
+                <div class="history-entry-header">
+                  <h3>
+                    {{ (item['action'] || 'KYC_ACTIVITY').replaceAll('_', ' ') }}
+                  </h3>
+
+                  @if (
+                    item['actionDate'] ||
+                    item['createdAt'] ||
+                    item['timestamp'] ||
+                    item['verificationDate']
+                  ) {
+                    <time>
+                      {{
+                        (
+                          item['actionDate'] ||
+                          item['createdAt'] ||
+                          item['timestamp'] ||
+                          item['verificationDate']
+                        ) | date:'medium'
+                      }}
+                    </time>
+                  }
+                </div>
+
+                @if (item['remarks']) {
+                  <p>{{ item['remarks'] }}</p>
+                } @else {
+                  <p>Activity recorded for this KYC request.</p>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="history-message">
+          <p>Click “View History” to load the verification activity.</p>
+        </div>
+      }
+    </section>
+
+    <!-- Page Actions -->
+    <div class="page-actions">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="kyc = null; documents = []; history = []; clearMessages()">
+        Back
+      </button>
+    </div>
+  }
+</div>

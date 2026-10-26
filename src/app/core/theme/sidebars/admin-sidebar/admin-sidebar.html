@@ -1,0 +1,42 @@
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">I</div>
+    <div class="brand-text">
+      <h2>InsurePro</h2>
+      <span>Administration</span>
+    </div>
+  </div>
+
+  <div class="menu-label">MAIN MENU</div>
+
+  <nav class="navigation">
+    <a
+      routerLink="/admin/dashboard"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item">
+      <span class="nav-icon">▦</span>
+      <span>Dashboard</span>
+    </a>
+
+    <div class="menu-label">CUSTOMER MANAGEMENT</div>
+
+    <a
+      routerLink="/admin/kyc"
+      routerLinkActive="active"
+      class="nav-item">
+      <span class="nav-icon">✓</span>
+      <span>KYC Verification</span>
+      <span class="nav-arrow">›</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="avatar">A</div>
+    <div class="footer-text">
+      <strong>Administrator</strong>
+      <span>Admin Panel</span>
+    </div>
+  </div>
+</aside>
