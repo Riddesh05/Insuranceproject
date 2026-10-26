@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-const API_URL = 'http://localhost:8085/api/v1/kyc';
+const API_URL = 'http://16.176.134.53:8085/api/v1/kyc';
 
 export interface CustomerKyc {
   rejectionRemarks: string | null;

@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Customer } from '../models/customer.model';
 
-const API_URL = 'http://localhost:8086/api/v1/customers';
+const API_URL = 'http://16.176.134.53:8086/api/v1/customers';
 
 @Injectable({
   providedIn: 'root'
